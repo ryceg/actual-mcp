@@ -13,6 +13,11 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import path from "path";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+const dotenvPath = process.env.DOTENV_CONFIG_PATH || ".env";
+dotenv.config({ path: dotenvPath });
 
 import { setupPrompts } from "./prompts.js";
 import { setupTools } from "./tools/index.js";
@@ -21,7 +26,7 @@ import { setupResources } from "./resources.js";
 // Configuration
 const DEFAULT_DATA_DIR: string = path.resolve(
   process.env.HOME || process.env.USERPROFILE || ".",
-  ".actual"
+  process.platform === "win32" ? "Documents/Actual" : ".actual",
 );
 
 // Initialize the MCP server
@@ -36,7 +41,7 @@ const server = new Server(
       tools: {},
       prompts: {},
     },
-  }
+  },
 );
 
 // ----------------------------
@@ -48,19 +53,19 @@ async function main(): Promise<void> {
   // Validate environment variables
   if (!process.env.ACTUAL_DATA_DIR && !process.env.ACTUAL_SERVER_URL) {
     console.error(
-      "Warning: Neither ACTUAL_DATA_DIR nor ACTUAL_SERVER_URL is set."
+      "Warning: Neither ACTUAL_DATA_DIR nor ACTUAL_SERVER_URL is set.",
     );
     console.error(
-      `Will try to use default data directory: ${DEFAULT_DATA_DIR}`
+      `Will try to use default data directory: ${DEFAULT_DATA_DIR}`,
     );
   }
 
   if (process.env.ACTUAL_SERVER_URL && !process.env.ACTUAL_PASSWORD) {
     console.error(
-      "Warning: ACTUAL_SERVER_URL is set but ACTUAL_PASSWORD is not."
+      "Warning: ACTUAL_SERVER_URL is set but ACTUAL_PASSWORD is not.",
     );
     console.error(
-      "If your server requires authentication, initialization will fail."
+      "If your server requires authentication, initialization will fail.",
     );
   }
 

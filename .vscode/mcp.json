@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "actual-budget": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:/Users/User/Documents/mcp-actualbudget/build/index.js"],
+      "env": {
+        "DOTENV_CONFIG_PATH": "${workspaceFolder}/.env"
+      }
+    }
+  }
+}

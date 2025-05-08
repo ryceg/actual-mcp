@@ -4,7 +4,7 @@ import { BudgetFile } from "./types.js";
 
 const DEFAULT_DATA_DIR: string = path.resolve(
   process.env.HOME || process.env.USERPROFILE || ".",
-  ".actual"
+  process.platform === "win32" ? "Documents/Actual" : ".actual",
 );
 
 // API initialization state
@@ -28,7 +28,7 @@ export async function initActualApi(): Promise<void> {
 
   try {
     initializing = true;
-    console.error("Initializing Actual Budget API...");
+    console.log("Initializing Actual Budget API...");
     await api.init({
       dataDir: process.env.ACTUAL_DATA_DIR || DEFAULT_DATA_DIR,
       serverURL: process.env.ACTUAL_SERVER_URL,
@@ -38,7 +38,7 @@ export async function initActualApi(): Promise<void> {
     const budgets: BudgetFile[] = await api.getBudgets();
     if (!budgets || budgets.length === 0) {
       throw new Error(
-        "No budgets found. Please create a budget in Actual first."
+        "No budgets found. Please create a budget in Actual first.",
       );
     }
 
@@ -48,11 +48,18 @@ export async function initActualApi(): Promise<void> {
       budgets[0].cloudFileId ||
       budgets[0].id ||
       "";
-    console.error(`Loading budget: ${budgetId}`);
-    await api.downloadBudget(budgetId);
+    console.log(`Loading budget: ${budgetId}`);
+    await api.downloadBudget(
+      budgetId,
+      process.env.ACTUAL_PASSWORD
+        ? {
+            password: process.env.ACTUAL_PASSWORD,
+          }
+        : {},
+    );
 
     initialized = true;
-    console.error("Actual Budget API initialized successfully");
+    console.log("Actual Budget API initialized successfully");
   } catch (error) {
     console.error("Failed to initialize Actual Budget API:", error);
     initializationError =
@@ -99,7 +106,11 @@ export async function getCategoryGroups() {
 /**
  * Get transactions for a specific account and date range (ensures API is initialized)
  */
-export async function getTransactions(accountId: string, start: string, end: string) {
+export async function getTransactions(
+  accountId: string,
+  start: string,
+  end: string,
+) {
   await initActualApi();
   return api.getTransactions(accountId, start, end);
 }
